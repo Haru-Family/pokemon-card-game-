@@ -1,0 +1,220 @@
+:root{
+  --bg:#0b1020;
+  --panel:#121a33;
+  --text:#e9eeff;
+  --muted:#aab4e6;
+  --accent:#6ee7ff;
+  --shadow: 0 12px 30px rgba(0,0,0,.35);
+  --radius: 18px;
+
+  /* ✅ 헤더/푸터 높이를 예측해서 보드 높이 계산에 사용 */
+  --header-h: 96px;
+  --footer-h: 28px;
+
+  /* ✅ 카드 최소/최대 크기 (화면에 맞춰 자동 조절) */
+  --card-min: 64px;
+  --card-max: 150px;
+
+  --gap: 10px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
+  background: radial-gradient(1200px 700px at 30% 10%, rgba(110,231,255,.18), transparent 60%),
+              radial-gradient(1000px 700px at 80% 30%, rgba(92,255,154,.10), transparent 55%),
+              var(--bg);
+  color:var(--text);
+
+  /* ✅ 스크롤 자체를 원천 차단(한 화면 목표) */
+  overflow: hidden;
+}
+
+/* ✅ 전체 레이아웃을 뷰포트(100vh) 기준으로 */
+.header{
+  max-width:1100px;
+  margin:0 auto;
+  padding:10px 14px 6px;
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  align-items:flex-start;
+  height: var(--header-h);
+}
+
+.title h1{
+  margin:0 0 4px;
+  font-size:18px;
+  letter-spacing:-0.3px;
+}
+.title p{
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.hud{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.stat{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  padding:6px 8px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  display:flex;
+  gap:6px;
+  align-items:baseline;
+}
+.stat .label{ color:var(--muted); font-size:11px; }
+.stat .value{ font-size:14px; font-weight:800; }
+.stat .sub{ color:var(--muted); font-size:11px; margin-left:2px; }
+
+.btn{
+  cursor:pointer;
+  border:none;
+  color:#031018;
+  background: linear-gradient(135deg, var(--accent), #b4ffdf);
+  padding:7px 10px;
+  border-radius: 12px;
+  font-weight:800;
+  box-shadow: var(--shadow);
+}
+.btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+/* ✅ main도 고정 높이로 보드에 공간을 양보 */
+.main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 14px 10px;
+  height: calc(100vh - var(--header-h) - var(--footer-h));
+  display:flex;
+  flex-direction:column;
+  min-height: 0; /* flex overflow 방지 */
+}
+
+.status{
+  margin:6px 0 8px;
+  padding:8px 10px;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color:var(--muted);
+  font-size:12px;
+
+  /* ✅ 상태 문구가 길어져서 높이가 커지면 보드가 밀리니 줄임 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ✅ 여기부터가 핵심: 화면 크기에 맞춰 열/카드 크기 자동 결정 */
+.board{
+  flex: 1;
+  min-height: 0;
+
+  display:grid;
+  gap: var(--gap);
+
+  /* ✅ 가능한 한 화면에 들어가도록 자동열 */
+  grid-template-columns: repeat(auto-fit, minmax(clamp(var(--card-min), 10vw, var(--card-max)), 1fr));
+
+  /* ✅ 20장을 한 화면에 넣기 위해 컨테이너 내부에서만 정렬 */
+  align-content: stretch;
+}
+
+/* 카드 */
+.card{
+  width:100%;
+  height:100%;
+
+  /* ✅ 보드 높이 안에서 "행"이 자동으로 균등 분배되게 */
+  aspect-ratio: 3 / 4;
+  perspective: 1000px;
+}
+
+.card button{
+  all:unset;
+  cursor:pointer;
+  width:100%;
+  height:100%;
+  display:block;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transform-style: preserve-3d;
+  transition: transform .28s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.card.is-flipped button,
+.card.is-matched button{ transform: rotateY(180deg); }
+
+.face{
+  position:absolute;
+  inset:0;
+  border-radius: var(--radius);
+  overflow:hidden;
+  backface-visibility:hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+}
+
+.face.front{ transform: rotateY(180deg); }
+
+.face img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
+}
+
+.badge{
+  position:absolute;
+  bottom:8px;
+  left:8px;
+  right:8px;
+  text-align:center;
+  font-size:11px;
+  padding:5px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.30);
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--text);
+}
+
+/* ✅ iPad mini 가로(1024)에서 “한 화면” 목표: 4열 고정이 가장 안정적 */
+@media (min-width: 900px) and (max-width: 1100px){
+  .board{
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ✅ 세로가 낮은 기기(가로모드)에서는 헤더/갭 더 줄여서 보드 확보 */
+@media (max-height: 700px){
+  :root{ --header-h: 82px; --gap: 8px; }
+  .title p{ display:none; }
+  .status{ display:none; } /* 상태바까지 없애서 1화면 확률 최대화 */
+}
+
+/* footer */
+.footer{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 14px 8px;
+  height: var(--footer-h);
+  color: rgba(233,238,255,.65);
+  font-size:11px;
+}

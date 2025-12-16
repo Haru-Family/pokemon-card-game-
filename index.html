@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <link
+  rel="icon"
+  type="image/png"
+  href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>포켓몬 카드 맞추기 (20장 / 10쌍)</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="title">
+      <h1>포켓몬 카드 맞추기</h1>
+      <p>같은 카드 2장을 뒤집어 맞추면 성공! (20장 / 10쌍)</p>
+    </div>
+
+    <div class="hud">
+      <div class="stat"><span class="label">이동</span><span id="moves" class="value">0</span></div>
+      <div class="stat"><span class="label">정답</span><span id="matches" class="value">0</span><span class="sub">/ 10</span></div>
+      <button id="restartBtn" class="btn">다시 시작</button>
+      <button id="startBtn" class="btn">게임 시작</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="status" class="status" aria-live="polite">로딩 중...</div>
+    <section id="board" class="board" aria-label="포켓몬 카드 게임 보드"></section>
+  </main>
+
+  <footer class="footer">
+    <small>
+      Images/data powered by PokeAPI. (GitHub Pages 정적 배포 가능)
+    </small>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
