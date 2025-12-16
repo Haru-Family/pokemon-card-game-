@@ -10,7 +10,7 @@
  *  - #board, #status, #moves, #matches, #restartBtn, #startBtn
  */
 
-const BOARD_SIZE_PAIRS = 10;
+const BOARD_SIZE_PAIRS = 5;
 const MAX_POKEMON_ID = 151;
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 

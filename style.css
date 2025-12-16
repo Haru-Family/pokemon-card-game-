@@ -1,59 +1,67 @@
 :root{
   --bg:#0b1020;
-  --panel:#121a33;
   --text:#e9eeff;
   --muted:#aab4e6;
   --accent:#6ee7ff;
-  --shadow: 0 12px 30px rgba(0,0,0,.35);
-  --radius: 18px;
+  --shadow: 0 10px 24px rgba(0,0,0,.35);
+  --radius: 16px;
 
-  /* ✅ 헤더/푸터 높이를 예측해서 보드 높이 계산에 사용 */
-  --header-h: 96px;
-  --footer-h: 28px;
+  /* 레이아웃 높이 제어 */
+  --header-h: 88px;
+  --footer-h: 26px;
 
-  /* ✅ 카드 최소/최대 크기 (화면에 맞춰 자동 조절) */
-  --card-min: 64px;
-  --card-max: 150px;
+  /* ✅ 화면이 좁아지면 gap도 자동으로 줄어들게 */
+  --gap: clamp(6px, 1.2vw, 10px);
 
-  --gap: 10px;
+  /* ✅ 카드 비율(필요하면 더 눌러서 1화면 유지) */
+  --card-ratio-w: 3;
+  --card-ratio-h: 4;
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+html, body{ height:100%; }
 
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, sans-serif;
-  background: radial-gradient(1200px 700px at 30% 10%, rgba(110,231,255,.18), transparent 60%),
-              radial-gradient(1000px 700px at 80% 30%, rgba(92,255,154,.10), transparent 55%),
-              var(--bg);
+  background:
+    radial-gradient(1200px 700px at 30% 10%, rgba(110,231,255,.18), transparent 60%),
+    radial-gradient(1000px 700px at 80% 30%, rgba(92,255,154,.10), transparent 55%),
+    var(--bg);
   color:var(--text);
 
-  /* ✅ 스크롤 자체를 원천 차단(한 화면 목표) */
-  overflow: hidden;
+  /* ✅ 가로 삐져나오는 현상 방지 */
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
-/* ✅ 전체 레이아웃을 뷰포트(100vh) 기준으로 */
+/* ================= HEADER ================= */
+
 .header{
-  max-width:1100px;
+  /* ✅ max-width 때문에 좁은 화면에서 레이아웃이 틀어지는 걸 방지 */
+  width: min(1100px, 100vw);
   margin:0 auto;
   padding:10px 14px 6px;
+  height: var(--header-h);
+
   display:flex;
   gap:10px;
   justify-content:space-between;
   align-items:flex-start;
-  height: var(--header-h);
 }
 
+.title{
+  min-width: 0;
+}
 .title h1{
   margin:0 0 4px;
-  font-size:18px;
+  font-size: clamp(16px, 2vw, 18px);
   letter-spacing:-0.3px;
 }
 .title p{
   margin:0;
+  font-size: clamp(11px, 1.4vw, 12px);
   color:var(--muted);
-  font-size:12px;
 }
 
 .hud{
@@ -74,9 +82,18 @@ body{
   gap:6px;
   align-items:baseline;
 }
-.stat .label{ color:var(--muted); font-size:11px; }
-.stat .value{ font-size:14px; font-weight:800; }
-.stat .sub{ color:var(--muted); font-size:11px; margin-left:2px; }
+.stat .label{
+  font-size:11px;
+  color:var(--muted);
+}
+.stat .value{
+  font-size:14px;
+  font-weight:800;
+}
+.stat .sub{
+  font-size:11px;
+  color:var(--muted);
+}
 
 .btn{
   cursor:pointer;
@@ -88,17 +105,22 @@ body{
   font-weight:800;
   box-shadow: var(--shadow);
 }
-.btn:disabled{ opacity:.55; cursor:not-allowed; }
+.btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
 
-/* ✅ main도 고정 높이로 보드에 공간을 양보 */
+/* ================= MAIN ================= */
+
 .main{
-  max-width:1100px;
+  width: min(1100px, 100vw);
   margin:0 auto;
-  padding:0 14px 10px;
+  padding:0 14px 8px;
+
   height: calc(100vh - var(--header-h) - var(--footer-h));
   display:flex;
   flex-direction:column;
-  min-height: 0; /* flex overflow 방지 */
+  min-height:0; /* ✅ flex 내부 overflow 방지 */
 }
 
 .status{
@@ -110,35 +132,45 @@ body{
   color:var(--muted);
   font-size:12px;
 
-  /* ✅ 상태 문구가 길어져서 높이가 커지면 보드가 밀리니 줄임 처리 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ✅ 여기부터가 핵심: 화면 크기에 맞춰 열/카드 크기 자동 결정 */
+/* ================= BOARD ================= */
+/* ✅ 10장(5쌍) → 5열 × 2행 고정, 대신 '줄어들 수 있게' 최소 너비 제한 해제 */
+
 .board{
-  flex: 1;
-  min-height: 0;
+  flex:1;
+  min-height:0;
+
+  width: 100%;
+  max-width: 100%;
 
   display:grid;
   gap: var(--gap);
 
-  /* ✅ 가능한 한 화면에 들어가도록 자동열 */
-  grid-template-columns: repeat(auto-fit, minmax(clamp(var(--card-min), 10vw, var(--card-max)), 1fr));
+  /* ✅ 핵심: minmax(0, 1fr)로 "최소 너비 0" 허용 → 가로 overflow 방지 */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 
-  /* ✅ 20장을 한 화면에 넣기 위해 컨테이너 내부에서만 정렬 */
   align-content: stretch;
+  justify-content: stretch;
 }
 
-/* 카드 */
+/* ================= CARD ================= */
+
 .card{
+  /* ✅ 핵심: grid 아이템이 줄어들도록 min-width:0 */
+  min-width: 0;
+  min-height: 0;
+
   width:100%;
   height:100%;
-
-  /* ✅ 보드 높이 안에서 "행"이 자동으로 균등 분배되게 */
-  aspect-ratio: 3 / 4;
   perspective: 1000px;
+
+  /* 카드가 좁아져도 비율 유지 */
+  aspect-ratio: var(--card-ratio-w) / var(--card-ratio-h);
 }
 
 .card button{
@@ -151,12 +183,18 @@ body{
   box-shadow: var(--shadow);
   transform-style: preserve-3d;
   transition: transform .28s ease;
+
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+
+  /* ✅ iOS에서 살짝 overflow/찢김 방지 */
+  backface-visibility: hidden;
 }
 
 .card.is-flipped button,
-.card.is-matched button{ transform: rotateY(180deg); }
+.card.is-matched button{
+  transform: rotateY(180deg);
+}
 
 .face{
   position:absolute;
@@ -169,52 +207,72 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:8px;
+  padding: clamp(5px, 1vw, 8px);
 }
 
-.face.front{ transform: rotateY(180deg); }
+.face.front{
+  transform: rotateY(180deg);
+}
 
 .face img{
   width:100%;
   height:100%;
   object-fit:contain;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
+  max-width: 100%;
+  max-height: 100%;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
 }
 
 .badge{
   position:absolute;
-  bottom:8px;
-  left:8px;
-  right:8px;
+  bottom:6px;
+  left:6px;
+  right:6px;
   text-align:center;
-  font-size:11px;
-  padding:5px 8px;
+
+  /* ✅ 화면 좁으면 글씨도 자동 축소 */
+  font-size: clamp(9px, 1.2vw, 11px);
+  padding:4px 6px;
+
   border-radius: 999px;
   background: rgba(0,0,0,.30);
   border: 1px solid rgba(255,255,255,.14);
   color: var(--text);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ✅ iPad mini 가로(1024)에서 “한 화면” 목표: 4열 고정이 가장 안정적 */
-@media (min-width: 900px) and (max-width: 1100px){
-  .board{
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+/* ================= FOOTER ================= */
 
-/* ✅ 세로가 낮은 기기(가로모드)에서는 헤더/갭 더 줄여서 보드 확보 */
-@media (max-height: 700px){
-  :root{ --header-h: 82px; --gap: 8px; }
-  .title p{ display:none; }
-  .status{ display:none; } /* 상태바까지 없애서 1화면 확률 최대화 */
-}
-
-/* footer */
 .footer{
-  max-width:1100px;
+  width: min(1100px, 100vw);
   margin:0 auto;
-  padding:0 14px 8px;
+  padding:0 14px 6px;
   height: var(--footer-h);
-  color: rgba(233,238,255,.65);
   font-size:11px;
+  color: rgba(233,238,255,.65);
+}
+
+/* ================= RESPONSIVE TUNING ================= */
+
+/* ✅ 세로가 낮은 기기(가로모드/아이패드)에서는 카드 비율을 눌러서 "한 화면"을 더 확실히 */
+@media (max-height: 700px){
+  :root{
+    --header-h: 76px;
+    --card-ratio-w: 4;
+    --card-ratio-h: 5;
+  }
+  .title p{ display:none; }
+  .status{ display:none; }
+}
+
+/* ✅ 아주 작은 폭에서 5열이 너무 작아지는 경우: 그래도 5열 유지 + 카드 더 눌러서 대응 */
+@media (max-width: 520px){
+  :root{
+    --card-ratio-w: 1;
+    --card-ratio-h: 1; /* 정사각형에 가깝게 만들어서 작은 화면에서도 5열 유지 */
+    --radius: 14px;
+  }
 }
